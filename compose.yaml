@@ -1,0 +1,32 @@
+services:
+  database:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: legal
+      POSTGRES_USER: legal
+      POSTGRES_PASSWORD: "${ZH_POSTGRES_PASSWORD:?Set ZH_POSTGRES_PASSWORD}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legal -d legal"]
+      interval: 5s
+      timeout: 4s
+      retries: 12
+    volumes:
+      - postgres:/var/lib/postgresql/data
+  app:
+    build: .
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      ZH_DATABASE_URL: "postgresql+psycopg://legal:${ZH_POSTGRES_PASSWORD:?Set ZH_POSTGRES_PASSWORD}@database:5432/legal"
+      ZH_DATA_KEY: "${ZH_DATA_KEY:?Set ZH_DATA_KEY}"
+      ZH_LLM_URL: "${ZH_LLM_URL:-}"
+      ZH_LLM_MODEL: "${ZH_LLM_MODEL:-}"
+      ZH_LLM_KEY: "${ZH_LLM_KEY:-}"
+      ZH_ALLOW_CASE_TRANSFER: "${ZH_ALLOW_CASE_TRANSFER:-0}"
+      ZH_EMBEDDING_MODEL: "${ZH_EMBEDDING_MODEL:-}"
+    ports:
+      - "127.0.0.1:8000:8000"
+    command: ["sh", "-c", "zhkh-legal init && exec uvicorn zhkh_legal.api:app --host 0.0.0.0 --port 8000 --no-access-log --limit-concurrency 40"]
+volumes:
+  postgres:

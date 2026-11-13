@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zhkh-legal-engine"
+version = "0.2.0"
+description = "Kazakhstan housing and utilities legal analysis"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1", "pydantic>=2.8,<3", "uvicorn>=0.34,<1", "sqlalchemy>=2,<2.1",
+  "alembic>=1.14,<2", "psycopg[binary]>=3.2,<4", "pgvector>=0.3,<1",
+  "httpx>=0.28,<1", "python-multipart>=0.0.22,<1", "python-docx>=1.1,<2",
+  "pypdf>=6,<7", "pypdfium2>=4,<6", "pillow>=11,<13",
+  "reportlab>=4,<5", "cryptography>=44,<50"
+]
+
+[project.scripts]
+zhkh-legal = "zhkh_legal.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+zhkh_legal = ["static/*"]
